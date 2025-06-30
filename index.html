@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speedy Runner - Interactive Portfolio</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Character -->
+        <div class="character" id="character">
+            <div class="character-body"></div>
+        </div>
+        
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <div class="nav-tab" id="home-tab" data-section="home">
+                <div class="tab-trigger"></div>
+                <span>Home</span>
+            </div>
+            <div class="nav-tab" id="about-tab" data-section="about">
+                <div class="tab-trigger"></div>
+                <span>About</span>
+            </div>
+            <div class="nav-tab" id="projects-tab" data-section="projects">
+                <div class="tab-trigger"></div>
+                <span>Projects</span>
+            </div>
+            <div class="nav-tab" id="contact-tab" data-section="contact">
+                <div class="tab-trigger"></div>
+                <span>Contact</span>
+            </div>
+        </div>
+        
+        <!-- Content Sections -->
+        <div class="content-container">
+            <div class="content-section active" id="home">
+                <h1>Welcome to Speedy Runner's World!</h1>
+                <p>Use WASD keys to control the character:</p>
+                <ul>
+                    <li><strong>W</strong> - Jump</li>
+                    <li><strong>A</strong> - Move Left</li>
+                    <li><strong>S</strong> - Crouch</li>
+                    <li><strong>D</strong> - Move Right</li>
+                </ul>
+                <p>Navigate to different sections by running into the navigation tabs above!</p>
+                <div class="speed-indicator">
+                    <span>Speed: </span>
+                    <div class="speed-bar">
+                        <div class="speed-fill" id="speed-fill"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-section" id="about">
+                <h1>About Speedy Runner</h1>
+                <p>Meet our lightning-fast hero! This agile character can:</p>
+                <ul>
+                    <li>🏃‍♂️ Run at incredible speeds</li>
+                    <li>🦘 Jump over obstacles</li>
+                    <li>🐸 Crouch to avoid dangers</li>
+                    <li>⚡ Navigate through digital worlds</li>
+                </ul>
+                <p>Born in the digital realm, Speedy Runner is here to help you explore this interactive website. With lightning reflexes and boundless energy, they're ready for any adventure!</p>
+            </div>
+            
+            <div class="content-section" id="projects">
+                <h1>Projects & Adventures</h1>
+                <div class="project-grid">
+                    <div class="project-card">
+                        <h3>Speed Challenge</h3>
+                        <p>Master the art of precision jumping and running through obstacle courses.</p>
+                    </div>
+                    <div class="project-card">
+                        <h3>Navigation Quest</h3>
+                        <p>Explore different sections of the website using character-based navigation.</p>
+                    </div>
+                    <div class="project-card">
+                        <h3>Interactive Design</h3>
+                        <p>Experience a unique blend of gaming and web design.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-section" id="contact">
+                <h1>Get in Touch</h1>
+                <p>Ready to collaborate or have questions about Speedy Runner?</p>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <h3>🚀 Ready for Adventure?</h3>
+                        <p>Send a message and let's create something amazing together!</p>
+                    </div>
+                    <div class="contact-item">
+                        <h3>💨 Fast Response</h3>
+                        <p>Just like our speedy character, we respond quickly to all inquiries.</p>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <h3>Send a Message</h3>
+                    <form>
+                        <input type="text" placeholder="Your Name" required>
+                        <input type="email" placeholder="Your Email" required>
+                        <textarea placeholder="Your Message" required></textarea>
+                        <button type="submit">Send Message 🚀</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Controls Info -->
+        <div class="controls-info">
+            <div class="control-key">W</div>
+            <div class="control-key">A</div>
+            <div class="control-key">S</div>
+            <div class="control-key">D</div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
