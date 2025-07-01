@@ -25,12 +25,19 @@ class SpeedyRunner {
         this.isJumping = false;
         this.isCrouching = false;
         this.facingLeft = false;
+        this.isOnPlatform = false;
+        this.lastPlatform = null;
+        
+        this.platforms = [];
+        this.bouncePlatforms = [];
+        this.movingPlatforms = [];
         
         this.init();
     }
     
     init() {
         this.setupEventListeners();
+        this.setupPlatforms();
         this.gameLoop();
         this.showSection('home');
     }
@@ -94,6 +101,13 @@ class SpeedyRunner {
         }
     }
     
+    setupPlatforms() {
+        // Get all platform elements
+        this.platforms = Array.from(document.querySelectorAll('.platform'));
+        this.bouncePlatforms = Array.from(document.querySelectorAll('.bounce-platform'));
+        this.movingPlatforms = Array.from(document.querySelectorAll('.moving-platform'));
+    }
+    
     update() {
         // Handle input
         if (this.keys.a) {
@@ -120,12 +134,15 @@ class SpeedyRunner {
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
         
+        // Check platform collisions before boundary checks
+        this.checkPlatformCollisions();
+        
         // Boundary checks
         const maxX = window.innerWidth - 40;
         this.position.x = Math.max(0, Math.min(this.position.x, maxX));
         
-        // Ground collision
-        if (this.position.y <= this.groundLevel) {
+        // Ground collision (only if not on a platform)
+        if (!this.isOnPlatform && this.position.y <= this.groundLevel) {
             this.position.y = this.groundLevel;
             this.velocity.y = 0;
             this.isJumping = false;
@@ -162,23 +179,54 @@ class SpeedyRunner {
     }
     
     checkTabCollisions() {
-        const characterRect = this.character.getBoundingClientRect();
+        const characterRect = {
+            left: this.position.x,
+            right: this.position.x + 40,
+            top: window.innerHeight - this.position.y - 60,
+            bottom: window.innerHeight - this.position.y
+        };
         
         this.navTabs.forEach(tab => {
             const tabRect = tab.getBoundingClientRect();
             
-            // Check if character is colliding with tab
-            if (this.isColliding(characterRect, tabRect)) {
-                const section = tab.getAttribute('data-section');
-                this.showSection(section);
+            // Check if character's HEAD is hitting the BOTTOM of the tab
+            // Character must be jumping upward and hit from below
+            if (this.isJumping && this.velocity.y > 0) {
+                const headRect = {
+                    left: characterRect.left + 5,
+                    right: characterRect.right - 5,
+                    top: characterRect.top - 10,
+                    bottom: characterRect.top + 10
+                };
                 
-                // Add visual feedback
-                tab.classList.add('active');
+                const tabBottomRect = {
+                    left: tabRect.left,
+                    right: tabRect.right,
+                    top: tabRect.bottom - 10,
+                    bottom: tabRect.bottom + 5
+                };
                 
-                // Create particle effect
-                this.createParticleEffect(this.position.x + 20, window.innerHeight - this.position.y - 30);
-            } else {
-                tab.classList.remove('active');
+                if (this.isCollidingWithPlatform(headRect, tabBottomRect)) {
+                    const section = tab.getAttribute('data-section');
+                    this.showSection(section);
+                    
+                    // Add visual feedback
+                    tab.classList.add('active');
+                    
+                    // Bounce character down a bit
+                    this.velocity.y = -5;
+                    
+                    // Create particle effect
+                    this.createParticleEffect(this.position.x + 20, window.innerHeight - this.position.y - 30);
+                    
+                    // Add screen shake effect
+                    this.screenShake();
+                } else {
+                    // Remove active state if not colliding
+                    if (!tab.classList.contains('current-section')) {
+                        tab.classList.remove('active');
+                    }
+                }
             }
         });
     }
@@ -206,8 +254,10 @@ class SpeedyRunner {
         this.navTabs.forEach(tab => {
             if (tab.getAttribute('data-section') === sectionId) {
                 tab.classList.add('active');
+                tab.classList.add('current-section');
             } else {
                 tab.classList.remove('active');
+                tab.classList.remove('current-section');
             }
         });
     }
@@ -253,9 +303,61 @@ class SpeedyRunner {
         }
     }
     
+    checkPlatformCollisions() {
+        this.isOnPlatform = false;
+        const characterRect = {
+            left: this.position.x,
+            right: this.position.x + 40,
+            top: window.innerHeight - this.position.y - 60,
+            bottom: window.innerHeight - this.position.y
+        };
+        
+        // Check all platform types
+        const allPlatforms = [...this.platforms, ...this.bouncePlatforms, ...this.movingPlatforms];
+        
+        allPlatforms.forEach(platform => {
+            const platformRect = platform.getBoundingClientRect();
+            
+            // Check if character is colliding with platform
+            if (this.isCollidingWithPlatform(characterRect, platformRect)) {
+                // Landing on top of platform
+                if (this.velocity.y <= 0 && characterRect.bottom >= platformRect.top - 5 && characterRect.bottom <= platformRect.top + 10) {
+                    this.position.y = window.innerHeight - platformRect.top;
+                    this.velocity.y = 0;
+                    this.isJumping = false;
+                    this.isOnPlatform = true;
+                    this.lastPlatform = platform;
+                    
+                    // Special bounce platform behavior
+                    if (platform.classList.contains('bounce-platform')) {
+                        this.velocity.y = this.jumpPower * 1.5;
+                        this.isJumping = true;
+                        this.isOnPlatform = false;
+                        this.createParticleEffect(this.position.x + 20, window.innerHeight - this.position.y - 30);
+                    }
+                }
+            }
+        });
+    }
+    
+    isCollidingWithPlatform(charRect, platRect) {
+        return !(charRect.right < platRect.left || 
+                charRect.left > platRect.right || 
+                charRect.bottom < platRect.top || 
+                charRect.top > platRect.bottom);
+    }
+    
     gameLoop() {
         this.update();
         requestAnimationFrame(() => this.gameLoop());
+    }
+    
+    screenShake() {
+        const gameContainer = document.querySelector('.game-container');
+        gameContainer.style.animation = 'shake 0.3s ease-in-out';
+        setTimeout(() => {
+            gameContainer.style.animation = '';
+        }, 300);
     }
 }
 
